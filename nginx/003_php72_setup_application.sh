@@ -56,8 +56,8 @@ sudo cp /etc/php/7.2/fpm/pool.d/www.conf /etc/php/7.2/fpm/pool.d/${application_n
 
 # change the vars
 sudo sed --in-place "s@\[www\]@[${application_name}]@g" /etc/php/7.2/fpm/pool.d/${application_name}.conf
-sudo sed --in-place "s@user = www-data$@user = ${RUN_AS_USERNAME}@" /etc/php/7.2/fpm/pool.d/${application_name}.conf
-sudo sed --in-place "s@group = www-data$@group = ${RUN_AS_USERNAME}@" /etc/php/7.2/fpm/pool.d/${application_name}.conf
+sudo sed --in-place "s^user = www-data$^user = ${RUN_AS_USERNAME}^" /etc/php/7.2/fpm/pool.d/${application_name}.conf
+sudo sed --in-place "s^group = www-data$^group = ${RUN_AS_USERNAME}^" /etc/php/7.2/fpm/pool.d/${application_name}.conf
 
 sudo sed --in-place "s@listen = /run/php/php7.2-fpm.sock@listen = /var/run/php7.2-fpm-${application_name}.sock@g" /etc/php/7.2/fpm/pool.d/${application_name}.conf
 
