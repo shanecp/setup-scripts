@@ -70,7 +70,16 @@ sudo sed --in-place "s@listen = /run/php/php7.2-fpm.sock@listen = /var/run/php7.
 # wget https://raw.githubusercontent.com/shanecp/setup-scripts/master/nginx/001_nginx_default.conf
 
 # create nginx configuration
-sudo cp `pwd`/001_nginx_default.conf /etc/nginx/sites-available/${application_name}.conf
+NGINX_CONF_TEMPLATE=`pwd`/001_nginx_default.conf
+if test -f "$NGINX_CONF_TEMPLATE"; then
+	sudo rm /etc/nginx/sites-enabled/default
+else
+	echo "Default Nginx config not found at {$NGINX_CONF_TEMPLATE}."
+	exit 0;
+fi
+
+# create nginx configuration
+sudo cp "$NGINX_CONF_TEMPLATE" /etc/nginx/sites-available/${application_name}.conf
 sudo sed --in-place "s@PUBLIC_PATH@${public_path}@g" /etc/nginx/sites-available/${application_name}.conf
 sudo sed --in-place "s@SERVER_NAME@${server_name}@g" /etc/nginx/sites-available/${application_name}.conf
 
