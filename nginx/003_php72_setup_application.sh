@@ -15,8 +15,17 @@ if [ $application_name == "" ]; then
 	exit 1;
 fi
 
+echo "Enter the username of the application owner. (This is a non-sudo user)"
+read RUN_AS_USERNAME
+
+if [ $RUN_AS_USERNAME == "" ]; then
+	echo "Unable to continue without a username."
+	echo "Done."
+	exit 1;
+fi
+
 # home_directory="$(eval echo ~${NON_ROOT_USERNAME})"
-echo "What is the full path to the public directory? (eg. /home/<user>/${application_name}/public_html)"
+echo "What is the full path to the public directory? (eg. /home/${RUN_AS_USERNAME}/${application_name}/public_html)"
 read public_path
 
 if [ $public_path == "" ]; then
@@ -35,14 +44,7 @@ if [ $server_name == "" ]; then
 	exit 1;
 fi
 
-echo "Enter the username of the application owner. (Non-root, but sudo user required)"
-read RUN_AS_USERNAME
 
-if [ $RUN_AS_USERNAME == "" ]; then
-	echo "Unable to continue without a username."
-	echo "Done."
-	exit 1;
-fi
 
 # ***************************************************************
 # PHP Application setup
@@ -56,11 +58,10 @@ sudo cp /etc/php/7.2/fpm/pool.d/www.conf /etc/php/7.2/fpm/pool.d/${application_n
 
 # change the vars
 sudo sed --in-place "s@\[www\]@[${application_name}]@g" /etc/php/7.2/fpm/pool.d/${application_name}.conf
-sudo sed --in-place "s^user = www-data$^user = ${RUN_AS_USERNAME}^" /etc/php/7.2/fpm/pool.d/${application_name}.conf
-sudo sed --in-place "s^group = www-data$^group = ${RUN_AS_USERNAME}^" /etc/php/7.2/fpm/pool.d/${application_name}.conf
+sudo sed --in-place "s&^user = www-data$&user = ${RUN_AS_USERNAME}&" /etc/php/7.2/fpm/pool.d/${application_name}.conf
+sudo sed --in-place "s&^group = www-data$&group = ${RUN_AS_USERNAME}&" /etc/php/7.2/fpm/pool.d/${application_name}.conf
 
 sudo sed --in-place "s@listen = /run/php/php7.2-fpm.sock@listen = /var/run/php7.2-fpm-${application_name}.sock@g" /etc/php/7.2/fpm/pool.d/${application_name}.conf
-
 
 # ***************************************************************
 # NGINX Application setup
@@ -78,7 +79,6 @@ else
 	exit 0;
 fi
 
-# create nginx configuration
 sudo cp "$NGINX_CONF_TEMPLATE" /etc/nginx/sites-available/${application_name}.conf
 sudo sed --in-place "s@PUBLIC_PATH@${public_path}@g" /etc/nginx/sites-available/${application_name}.conf
 sudo sed --in-place "s@SERVER_NAME@${server_name}@g" /etc/nginx/sites-available/${application_name}.conf
@@ -106,4 +106,5 @@ sudo nginx -t
 echo "Running as the user 'master'. For security, create a non-sudo user and run as that user"
 echo "Restart php with `sudo service php7.2-fpm restart`"
 echo "Restart nginx with `sudo service nginx reload`"
+echo "Give permissions to run the application with `sudo chown -R ${RUN_AS_USERNAME}:www-data ${application_name}`"
 echo "Done."
