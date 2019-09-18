@@ -106,5 +106,5 @@ sudo nginx -t
 echo "Running as the user 'master'. For security, create a non-sudo user and run as that user"
 echo "Restart php with `sudo service php7.2-fpm restart`"
 echo "Restart nginx with `sudo service nginx reload`"
-echo "Give permissions to run the application with `sudo chown -R ${RUN_AS_USERNAME}:www-data ${application_name}`"
+echo "Give permissions to run the application with `sudo chown -R ${RUN_AS_USERNAME}:www-data /home/${RUN_AS_USERNAME}/${application_name}`"
 echo "Done."
